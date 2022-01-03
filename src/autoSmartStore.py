@@ -60,7 +60,7 @@ def initWeb (chromePathList):
         chromedriver_autoinstaller.install(True)
         # driver = webdriver.Chrome(f'./{chrome_ver}/chromedriver.exe', options=option)
         driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=option)
-    driver.implicitly_wait(5)
+    driver.implicitly_wait(10)
 
     return driver
 
