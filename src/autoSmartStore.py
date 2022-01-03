@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import sys
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
@@ -337,7 +337,7 @@ def main():
 
     if len(orderInfoList) == 0:
         print('주문목록이 없습니다.')
-        exit()
+        sys.exit()
 
     # test data 저장
     # with open("orderinfo.yaml", 'w', encoding="utf-8") as stream:

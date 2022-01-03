@@ -24,6 +24,7 @@ pip install openpyxl
 pip install pyyaml
 pip install pyautogui
 pip install googledrivedownloader
+pip install pyinstaller
 ```
 
 ```
@@ -38,4 +39,9 @@ pip freeze > requirements.txt
 
 ```
 python ./src/autoSmartStore.py
+```
+
+pyinstaller build
+```
+pyinstaller -F ./src/autoSmartStore.py
 ```
