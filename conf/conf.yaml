@@ -1,0 +1,21 @@
+googleDriveFileId: <상품목록 엑셀 구글드라이브 공유 ID>
+
+chromePath:
+  - C:\Program Files\Google\Chrome\Application\chrome.exe
+  - C:\Program Files (x86)\Google\Chrome\Application\chrome.exe
+
+maxTry: 10
+
+smartStore:
+  smartStoreId: <스마트스토어 id>
+  smartStorePass: <스마트스토어 password>
+
+jenia:
+  purchaseOrderFormFile: "./data/jenia_form.xlsx"
+  purchaseOrderPath: "./제니아_발주서"
+
+mail:
+  sendMail: false
+  mailId: <메일 ID>
+  mailPass: <메일 password>
+  toEmail: <보낼 주소>
