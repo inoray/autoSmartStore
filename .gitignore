@@ -2,8 +2,12 @@
 _rels/
 docProps/
 xl/
+build/
+dist/
 제니아_발주서/
 orderinfo.yaml
 \[Content_Types\].xml
 등록제품 정보.xlsx
 conf/conf_shkim.yaml
+autoSmartStore.spec
+*.pyc
