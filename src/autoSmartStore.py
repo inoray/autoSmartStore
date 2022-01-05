@@ -181,16 +181,34 @@ def get_product_name_and_price (jn_sheet, order_product_name, order_option):
 
     # print(order_product_name)
     # print(order_option)
-    row = 9
+
+    # 주요 컬럼 위치 탐색
+    # 제품명, 모델명, 벤더 공급가액, 네이버 제품명,	네이버 옵션
+    title = ["제품명", "모델명", "벤더 공급가액", "네이버 제품명", "네이버 옵션"]
+
+    titleDict = {}
+    for row in range(1,20):
+        for col in range(1,50):
+            cell_value = jn_sheet.cell(row, col).value
+            if cell_value in title:
+                titleDict[cell_value] = [row, col]
+
+            if len(titleDict) == len(title):
+                break
+
+    if len(titleDict) == 0:
+        return "", 0
+
+    row = titleDict[title[0]][0] + 1
     product_name = ''
     price = 0
     while True:
-        jn_product_name = jn_sheet['d' + str(row)].value
-        jn_model = jn_sheet['e' + str(row)].value
-        jn_price = jn_sheet['f' + str(row)].value
+        jn_product_name = jn_sheet.cell(row, titleDict['제품명'][1]).value
+        jn_model = jn_sheet.cell(row, titleDict['모델명'][1]).value
+        jn_price = jn_sheet.cell(row, titleDict['벤더 공급가액'][1]).value
 
-        jn_naver_product_name = jn_sheet['q' + str(row)].value
-        jn_naver_option = jn_sheet['r' + str(row)].value
+        jn_naver_product_name = jn_sheet.cell(row, titleDict['네이버 제품명'][1]).value
+        jn_naver_option = jn_sheet.cell(row, titleDict['네이버 옵션'][1]).value
 
         if jn_product_name is None:
             break
