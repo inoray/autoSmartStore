@@ -215,7 +215,12 @@ def get_product_name_and_price (jn_sheet, order_product_name, order_option):
         # if jn_naver_product_name is not None:
         #     print(jn_naver_product_name)
         #     print(jn_naver_option)
-        if jn_naver_product_name == order_product_name and jn_naver_option in order_option:
+        # print("jn_naver_product_name: ", jn_naver_product_name)
+        # print("jn_naver_option: ", jn_naver_option)
+        # print("order_product_name: ", order_product_name)
+        # print("order_option: ", order_option)
+        # print("")
+        if jn_naver_product_name == order_product_name and (order_option == "" or jn_naver_option in order_option):
             if jn_model is None:
                 product_name = jn_product_name
             else:

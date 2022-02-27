@@ -1,6 +1,6 @@
 파이썬 가상환경 설정
 
-```
+```bash
 # 가상환경 생성
 python -m venv .venv
 
@@ -16,7 +16,7 @@ deactivate
 
 pip install 정보
 
-```
+```bash
 pip install selenium
 pip install webdriver_manager
 pip install chromedriver_autoinstaller
@@ -27,7 +27,7 @@ pip install googledrivedownloader
 pip install pyinstaller
 ```
 
-```
+```bash
 # python 패키지 설치
 pip install -r requirements.txt
 
@@ -37,11 +37,12 @@ pip freeze > requirements.txt
 
 실행
 
-```
+```bash
 python ./src/autoSmartStore.py
 ```
 
 pyinstaller build
-```
+
+```bash
 pyinstaller -F ./src/autoSmartStore.py
 ```
