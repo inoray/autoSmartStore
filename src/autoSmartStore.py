@@ -159,7 +159,12 @@ def getOderInfoFromStore(driver, smartStoreConf):
     return orderInfoList
 
 
-def getOrderInfoList_jenia (orderInfoList):
+def getOrderInfoList_jenia (orderInfoList, googleDriveFileId):
+
+    # 구글드라이브에서 등록제품 정보 다운로드
+    gdd.download_file_from_google_drive(file_id=googleDriveFileId,
+                                    dest_path='./등록제품 정보.xlsx',
+                                    unzip=True)
 
     product_info_wb = openpyxl.load_workbook('등록제품 정보.xlsx')
     jn_sheet = product_info_wb['제니아']
@@ -175,6 +180,7 @@ def getOrderInfoList_jenia (orderInfoList):
         orderInfoList_jenia.append(orderInfo_jenia)
 
     orderInfoList_jenia.sort(key=lambda orderInfo: [orderInfo['jenia_product_name'], orderInfo['order_num']])
+    os.remove('./등록제품 정보.xlsx')
     return orderInfoList_jenia
 
 def get_product_name_and_price (jn_sheet, order_product_name, order_option):
@@ -340,11 +346,6 @@ def main():
 
     os.makedirs(conf['jenia']['purchaseOrderPath'], exist_ok=True)
 
-    # 구글드라이브에서 등록제품 정보 다운로드
-    gdd.download_file_from_google_drive(file_id=conf['googleDriveFileId'],
-                                    dest_path='./등록제품 정보.xlsx',
-                                    unzip=True)
-
     # 스마트스토어에서 주문정보 가져오기
     driver = initWeb(conf['chromePath'])
     maxCount = conf['maxTry']
@@ -370,7 +371,7 @@ def main():
     #     orderInfoList = yaml.safe_load(stream)
 
     # 제니아 주문만 가져오기
-    orderInfoList_jenia = getOrderInfoList_jenia(orderInfoList)
+    orderInfoList_jenia = getOrderInfoList_jenia(orderInfoList, conf['googleDriveFileId'])
 
     if len(orderInfoList_jenia) > 0:
         d = datetime.datetime.now()
