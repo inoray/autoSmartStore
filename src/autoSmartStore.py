@@ -171,15 +171,17 @@ def getOrderInfoList_jenia (orderInfoList, googleDriveFileId):
 
     orderInfoList_jenia = []
     for orderInfo in orderInfoList:
-        product_name, price = get_product_name_and_price (jn_sheet, orderInfo['product_name'], orderInfo['option'])
+        brand, product_name, price = get_product_name_and_price (jn_sheet, orderInfo['product_name'], orderInfo['option'])
         if len(product_name) == 0:
             continue
         orderInfo_jenia = orderInfo
+        orderInfo_jenia['jenia_brand'] = brand
         orderInfo_jenia['jenia_product_name'] = product_name
         orderInfo_jenia['jenia_price'] = int(price)
         orderInfoList_jenia.append(orderInfo_jenia)
 
     orderInfoList_jenia.sort(key=lambda orderInfo: [orderInfo['jenia_product_name'], orderInfo['order_num']])
+
     os.remove('./등록제품 정보.xlsx')
     return orderInfoList_jenia
 
@@ -190,7 +192,7 @@ def get_product_name_and_price (jn_sheet, order_product_name, order_option):
 
     # 주요 컬럼 위치 탐색
     # 제품명, 모델명, 벤더 공급가액, 네이버 제품명,	네이버 옵션
-    title = ["제품명", "모델명", "벤더 공급가액", "네이버 제품명", "네이버 옵션"]
+    title = ["브랜드", "제품명", "모델명", "벤더 공급가액", "네이버 제품명", "네이버 옵션"]
 
     titleDict = {}
     for row in range(1,20):
@@ -206,9 +208,11 @@ def get_product_name_and_price (jn_sheet, order_product_name, order_option):
         return "", 0
 
     row = titleDict[title[0]][0] + 1
+    brand = ''
     product_name = ''
     price = 0
     while True:
+        jn_brand = jn_sheet.cell(row, titleDict['브랜드'][1]).value
         jn_product_name = jn_sheet.cell(row, titleDict['제품명'][1]).value
         jn_model = jn_sheet.cell(row, titleDict['모델명'][1]).value
         jn_price = jn_sheet.cell(row, titleDict['벤더 공급가액'][1]).value
@@ -232,13 +236,14 @@ def get_product_name_and_price (jn_sheet, order_product_name, order_option):
             else:
                 product_name = jn_model
             price = jn_price
+            brand = jn_brand
             break
         row += 1
         if row > 500:
             break
         # print (row)
 
-    return product_name, price
+    return brand, product_name, price
 
 def saveOderXlsx_jenia (orderInfoList, formExcelFilename, purchaseOrderExcelFilename):
     wb = openpyxl.load_workbook(formExcelFilename)
@@ -373,26 +378,61 @@ def main():
     # 제니아 주문만 가져오기
     orderInfoList_jenia = getOrderInfoList_jenia(orderInfoList, conf['googleDriveFileId'])
 
+    # 주문서를 분리해야 하는 항목이 있으면 분리
+    # print("'purchaseOrderSplit' in conf: ", 'purchaseOrderSplit' in conf['jenia'])
+    orderInfoList_jenia_arr = []
     if len(orderInfoList_jenia) > 0:
-        d = datetime.datetime.now()
-        dd = d.strftime("%Y%m%d")
+        if 'purchaseOrderSplit' in conf['jenia']:
+            for splitInfo in conf['jenia']['purchaseOrderSplit']:
+                newDict = {}
+                newList = []
+                for orderInfo in orderInfoList_jenia[:]:
+                    print("orderInfo['jenia_brand']: ", orderInfo['jenia_brand'])
+                    if orderInfo['jenia_brand'] in splitInfo['brandList']:
+                        # print("found brand: ", orderInfo['jenia_brand'])
+                        newList.append(orderInfo)
+                        orderInfoList_jenia.remove(orderInfo)
+                if len(newList) > 0:
+                    newDict['filePostfix'] = splitInfo['filePostfix']
+                    newDict['orderList'] = newList
+                    orderInfoList_jenia_arr.append(newDict)
 
-        purchaseOrderFilename = os.path.join(conf['jenia']['purchaseOrderPath'], f"{dd}_더티키_발주서.xlsx")
+    if len(orderInfoList_jenia) > 0:
+        newDict = {}
+        newDict['filePostfix'] = ""
+        newDict['orderList'] = orderInfoList_jenia
+        orderInfoList_jenia_arr.append(newDict)
 
-        order_summary_dict = saveOderXlsx_jenia (
-                                    orderInfoList_jenia,
-                                    conf['jenia']['purchaseOrderFormFile'],
-                                    purchaseOrderFilename)
-        mail_msg = genMailMsg_jenia(order_summary_dict)
+    # print(orderInfoList_jenia_arr)
 
-        print(mail_msg)
-        if conf['mail']['sendMail']:
-            sendMail (conf['mail']['mailId'],
-                      conf['mail']['mailPass'],
-                      conf['mail']['toEmail'],
-                      mail_msg,
-                      purchaseOrderFilename)
-            print("sendMail success!!")
+    for orderInfoList_jenia_dict in orderInfoList_jenia_arr:
+        filePostfix = orderInfoList_jenia_dict['filePostfix']
+        orderInfoList_jenia = orderInfoList_jenia_dict['orderList']
+        if len(orderInfoList_jenia) > 0:
+            d = datetime.datetime.now()
+            dd = d.strftime("%Y%m%d")
+
+            if len(filePostfix) > 0:
+                filename = f"{dd}_더티키_발주서_{filePostfix}.xlsx"
+            else:
+                filename = f"{dd}_더티키_발주서.xlsx"
+
+            purchaseOrderFilename = os.path.join(conf['jenia']['purchaseOrderPath'], filename)
+
+            order_summary_dict = saveOderXlsx_jenia (
+                                        orderInfoList_jenia,
+                                        conf['jenia']['purchaseOrderFormFile'],
+                                        purchaseOrderFilename)
+            mail_msg = genMailMsg_jenia(order_summary_dict)
+
+            print(mail_msg)
+            if conf['mail']['sendMail']:
+                sendMail (conf['mail']['mailId'],
+                        conf['mail']['mailPass'],
+                        conf['mail']['toEmail'],
+                        mail_msg,
+                        purchaseOrderFilename)
+                print("sendMail success!!")
 
 
 if __name__ == "__main__":
